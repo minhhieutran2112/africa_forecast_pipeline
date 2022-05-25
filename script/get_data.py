@@ -10,6 +10,7 @@ import requests
 from multiprocess import multiprocessor
 import pandas as pd
 import multiprocessing
+import os
 
 rawdata_dir_a4 = "../data/MCD43A4/raw/"
 task_done_path = "../data/task_done.csv"
@@ -19,7 +20,7 @@ file_done_df=pd.read_csv(file_done_path)
 task_done=task_done_df.iloc[:,0].tolist()
 file_done=file_done_df.iloc[:,0].tolist()
 
-response = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login', auth=('minhhieutran2112', 'Metmoivcl@123'))
+response = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login', auth=(os.environ['app_username'], os.environ['app_password']))
 token_response = response.json()
 token = token_response['token']
 response = requests.get(
