@@ -45,10 +45,10 @@ class subcounty_ts_aggregator(multiprocessor):
         VCI=rasterio.open(VCI_dir+self.filename)
         NDVI=rasterio.open(NDVI_dir+self.filename)
 
-        # filter pixels based on MCD12Q1 data
-        year=self.filename[:4]
-        landcover=rasterio.open(processeddata_dir_a4+'pixels_to_remove.tif')
-        has_landcover=0
+        # # filter pixels based on MCD12Q1 data
+        # year=self.filename[:4]
+        # landcover=rasterio.open(processeddata_dir_a4+'pixels_to_remove.tif')
+        # has_landcover=0
 
         # get geometry for masking
         subcounty_name=shapefile_data.loc[index,'joined_name']
@@ -58,23 +58,26 @@ class subcounty_ts_aggregator(multiprocessor):
         try:
             masked_VCI,_=mask.mask(VCI,geometry,crop=True)
             masked_NDVI,_=mask.mask(NDVI,geometry,crop=True)
-            masked_landcover,_=mask.mask(landcover,geometry,crop=True)
+            # masked_landcover,_=mask.mask(landcover,geometry,crop=True)
         except ValueError:
             self.completed[index] = 1
             return
 
-        if has_landcover==1:
-            landcover_cond=np.isin(masked_landcover,self.filter)
-        else:
-            landcover_cond=masked_landcover==1
+        # if has_landcover==1:
+        #     landcover_cond=np.isin(masked_landcover,self.filter)
+        # else:
+        #     landcover_cond=masked_landcover==1
 
-        if len(self.filter)==0:
-            masked_VCI = np.where((masked_VCI==VCI.nodata) | (landcover_cond),np.nan,masked_VCI)
-            masked_NDVI = np.where((masked_NDVI==NDVI.nodata) | (landcover_cond),np.nan,masked_NDVI)
-        else:
-            masked_VCI = np.where((masked_VCI==VCI.nodata),np.nan,masked_VCI)
-            masked_NDVI = np.where((masked_NDVI==NDVI.nodata),np.nan,masked_NDVI)
+        # if len(self.filter)==0:
+        #     masked_VCI = np.where((masked_VCI==VCI.nodata) | (landcover_cond),np.nan,masked_VCI)
+        #     masked_NDVI = np.where((masked_NDVI==NDVI.nodata) | (landcover_cond),np.nan,masked_NDVI)
+        # else:
+        #     masked_VCI = np.where((masked_VCI==VCI.nodata),np.nan,masked_VCI)
+        #     masked_NDVI = np.where((masked_NDVI==NDVI.nodata),np.nan,masked_NDVI)
         
+        masked_VCI = np.where((masked_VCI==VCI.nodata),np.nan,masked_VCI)
+        masked_NDVI = np.where((masked_NDVI==NDVI.nodata),np.nan,masked_NDVI)
+
         # write results
         self.subcounty_ts[subcounty_name]=self.subcounty_ts.get(subcounty_name,manager.dict())
         self.subcounty_ts[subcounty_name]['Date']=self.subcounty_ts[subcounty_name].get('Date',[]) + [int(self.filename.replace('.tif',''))]
